@@ -1,0 +1,116 @@
+import Data.Char (toUpper)
+
+-- HC11T1: Ask for name and greet
+hc11t1 :: IO ()
+hc11t1 = do
+  putStrLn "What's your name?"
+  name <- getLine
+  putStrLn $ "Hello, " ++ name ++ "!"
+
+-- HC11T2: Read a line and print its length
+hc11t2 :: IO ()
+hc11t2 = do
+  putStrLn "Enter a line:"
+  line <- getLine
+  putStrLn $ "Number of characters: " ++ show (length line)
+
+-- HC11T3: Read a number, multiply by 2, print result
+hc11t3 :: IO ()
+hc11t3 = do
+  putStrLn "Enter a number:"
+  input <- getLine
+  let num = read input :: Int
+  putStrLn $ "Double of your number is: " ++ show (num * 2)
+
+-- HC11T4: Read two lines and concatenate
+hc11t4 :: IO ()
+hc11t4 = do
+  putStrLn "Enter first line:"
+  line1 <- getLine
+  putStrLn "Enter second line:"
+  line2 <- getLine
+  putStrLn $ "Concatenated: " ++ line1 ++ line2
+
+-- HC11T5: Repeat until "quit" entered
+hc11t5 :: IO ()
+hc11t5 = do
+  putStrLn "Type something (type 'quit' to exit):"
+  loop
+  where
+    loop = do
+      input <- getLine
+      if input == "quit"
+        then putStrLn "Goodbye!"
+        else do
+          putStrLn $ "You said: " ++ input
+          loop
+
+-- HC11T6: Read line, convert to uppercase, print
+hc11t6 :: IO ()
+hc11t6 = do
+  putStrLn "Enter text:"
+  line <- getLine
+  putStrLn $ map toUpper line
+
+-- HC11T7: Menu with options
+hc11t7 :: IO ()
+hc11t7 = do
+  putStrLn "Choose an option:"
+  putStrLn "1) Greet"
+  putStrLn "2) Show placeholder date"
+  putStrLn "3) Exit"
+  choice <- getLine
+  case choice of
+    "1" -> putStrLn "Hello from option 1!" >> hc11t7
+    "2" -> putStrLn "Today's date is 2025-06-30 (placeholder)" >> hc11t7
+    "3" -> putStrLn "Exiting menu."
+    _   -> putStrLn "Invalid choice, try again." >> hc11t7
+
+-- HC11T8: Read number and print if even or odd
+hc11t8 :: IO ()
+hc11t8 = do
+  putStrLn "Enter a number:"
+  input <- getLine
+  let num = read input :: Int
+  putStrLn $ if even num then "Even" else "Odd"
+
+-- HC11T9: Read two numbers and print their sum
+hc11t9 :: IO ()
+hc11t9 = do
+  putStrLn "Enter first number:"
+  input1 <- getLine
+  putStrLn "Enter second number:"
+  input2 <- getLine
+  let n1 = read input1 :: Int
+      n2 = read input2 :: Int
+  putStrLn $ "Sum: " ++ show (n1 + n2)
+
+-- HC11T10: Read input and reverse string
+hc11t10 :: IO ()
+hc11t10 = do
+  putStrLn "Enter a string:"
+  str <- getLine
+  putStrLn $ "Reversed: " ++ reverse str
+
+-- Optional interactive menu to run tasks
+main :: IO ()
+main = do
+  putStrLn "HC11 Tasks: Enter task number 1-10, or 0 to exit."
+  menuLoop
+  where
+    menuLoop = do
+      putStr "Task number: "
+      choice <- getLine
+      case choice of
+        "1" -> hc11t1 >> menuLoop
+        "2" -> hc11t2 >> menuLoop
+        "3" -> hc11t3 >> menuLoop
+        "4" -> hc11t4 >> menuLoop
+        "5" -> hc11t5 >> menuLoop
+        "6" -> hc11t6 >> menuLoop
+        "7" -> hc11t7 >> menuLoop
+        "8" -> hc11t8 >> menuLoop
+        "9" -> hc11t9 >> menuLoop
+        "10" -> hc11t10 >> menuLoop
+        "0" -> putStrLn "Goodbye!"
+        _   -> putStrLn "Invalid choice." >> menuLoop
