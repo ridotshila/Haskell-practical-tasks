@@ -1,97 +1,90 @@
--- HC9 - Haskell Chapter 9: Parameterized and Recursive Types
+-- HC9T1: Parametric Type Synonym
+type Address = String
+type Entity a = (a, Address)
 
--- Task 1: Parametric type synonym
-type Entity a = (a, String)  -- e.g., (Int, "address"), (String, "location")
+-- HC9T2: Parametric Box Data Type
+data Box a = Empty | Has a
+    deriving (Show)
 
--- Task 2: Parametric data type Box
-data Box a = Empty | Has a deriving Show
-
--- Task 3: Add a number to a Box (if it contains one)
-addN :: Num a => a -> Box a -> Box a
-addN n (Has x) = Has (n + x)
+-- HC9T3: Add value to Box
+addN :: Int -> Box Int -> Box Int
+addN n (Has x) = Has (x + n)
 addN _ Empty   = Empty
 
--- Task 4: Extract value or return default
+-- HC9T4: Extract value from Box
 extract :: a -> Box a -> a
-extract _ (Has x) = x
-extract def Empty = def
+extract def (Has x) = x
+extract def Empty   = def
 
--- Task 5: Parametric Shape with color
-data Shape a = Circle a Float | Rectangle a Float Float deriving Show
--- Example: Circle "red" 10.0
+-- HC9T5: Shape with record syntax
+data Shape a = Circle { color :: a }
+             | Rectangle { color :: a }
+    deriving (Show)
 
--- Task 6: Recursive Tweet type
-data Tweet = Tweet {
-  content :: String,
-  likes :: Int,
-  comments :: [Tweet]
-} deriving Show
+-- HC9T6: Recursive Tweet Type
+data Tweet = Tweet
+    { content  :: String
+    , likes    :: Int
+    , comments :: [Tweet]
+    } deriving (Show)
 
--- Task 7: Engagement: likes + engagement of all comments
+-- HC9T7: Engagement Calculator
 engagement :: Tweet -> Int
 engagement (Tweet _ l cs) = l + sum (map engagement cs)
 
--- Task 8: Recursive sequence type
-data Sequence a = End | Node a (Sequence a) deriving Show
+-- HC9T8: Recursive Sequence Type
+data Sequence a = Nil | Node a (Sequence a)
+    deriving (Show)
 
--- Task 9: Check if element is in Sequence
+-- HC9T9: Check for element in Sequence
 elemSeq :: Eq a => a -> Sequence a -> Bool
-elemSeq _ End = False
-elemSeq x (Node y rest) = x == y || elemSeq x rest
+elemSeq _ Nil = False
+elemSeq x (Node y ys)
+    | x == y    = True
+    | otherwise = elemSeq x ys
 
--- Task 10: Binary Search Tree
-data BST a = Nil | NodeBST a (BST a) (BST a) deriving Show
+-- HC9T10: Binary Search Tree
+data BST a = EmptyTree
+           | TreeNode a (BST a) (BST a)
+    deriving (Show)
 
--- Sample insert for testing BST
-insertBST :: Ord a => a -> BST a -> BST a
-insertBST x Nil = NodeBST x Nil Nil
-insertBST x (NodeBST y left right)
-  | x < y     = NodeBST y (insertBST x left) right
-  | x > y     = NodeBST y left (insertBST x right)
-  | otherwise = NodeBST y left right
-
--- Main function
+-- ✅ Unified main function to test all
 main :: IO ()
 main = do
-  putStrLn "=== HC9 Haskell Chapter 9 Tasks ==="
+    putStrLn "--- HC9T1: Entity ---"
+    let rofhaEntity :: Entity String
+        rofhaEntity = ("Rofha", "123 Tech Lane")
+    print rofhaEntity
 
-  -- Task 1
-  putStrLn "\nTask 1: Entity"
-  print (("Alice", "123 Lane") :: Entity String)
-  print ((42, "Blockchain") :: Entity Int)
+    putStrLn "\n--- HC9T2, HC9T3, HC9T4: Box ---"
+    let boxRokhe = Has 10
+    let boxWama = Empty :: Box Int
+    print (addN 5 boxRokhe)         -- Has 15
+    print (addN 3 boxWama)          -- Empty
+    print (extract 100 boxRokhe)    -- 10
+    print (extract 200 boxWama)     -- 200
 
-  -- Task 2 & 3 & 4
-  putStrLn "\nTask 2-4: Box operations"
-  let box1 = Has 10
-  let box2 = addN 5 box1
-  let box3 = addN 3 (Empty :: Box Int)
-  print box1
-  print box2
-  print box3
-  print (extract 0 box2)
-  print (extract 999 box3)
+    putStrLn "\n--- HC9T5: Shapes ---"
+    let shape1 = Circle "Red (Rofha)"
+    let shape2 = Rectangle "Blue (Rokhe)"
+    print shape1
+    print shape2
 
-  -- Task 5
-  putStrLn "\nTask 5: Shape with color"
-  print (Circle "Red" 5.0)
-  print (Rectangle "Blue" 4.0 6.0)
+    putStrLn "\n--- HC9T6, HC9T7: Tweet & Engagement ---"
+    let comment1 = Tweet "Rofha liked it" 2 []
+    let comment2 = Tweet "Rokhe retweeted" 3 []
+    let mainTweet = Tweet "Wama posted!" 5 [comment1, comment2]
+    print mainTweet
+    putStrLn ("Engagement: " ++ show (engagement mainTweet))  -- 10
 
-  -- Task 6 & 7
-  putStrLn "\nTask 6 & 7: Tweet Engagement"
-  let reply1 = Tweet "Nice!" 3 []
-  let reply2 = Tweet "Interesting." 2 []
-  let tweet1 = Tweet "Check out my post!" 10 [reply1, reply2]
-  print tweet1
-  print ("Engagement: " ++ show (engagement tweet1))
+    putStrLn "\n--- HC9T8, HC9T9: Sequence ---"
+    let seq1 = Node "Rofha" (Node "Rokhe" (Node "Wama" Nil))
+    print seq1
+    putStrLn $ "Contains 'Wama'? " ++ show (elemSeq "Wama" seq1) -- True
+    putStrLn $ "Contains 'Zizi'? " ++ show (elemSeq "Zizi" seq1) -- False
 
-  -- Task 8 & 9
-  putStrLn "\nTask 8 & 9: Sequence"
-  let seq1 = Node 1 (Node 2 (Node 3 End))
-  print seq1
-  print (elemSeq 2 seq1)
-  print (elemSeq 5 seq1)
-
-  -- Task 10
-  putStrLn "\nTask 10: Binary Search Tree"
-  let bst = foldr insertBST Nil [10, 5, 15, 3, 7, 12, 18]
-  print bst
+    putStrLn "\n--- HC9T10: Binary Search Tree ---"
+    let bst = TreeNode "Rokhe"
+                (TreeNode "Rofha" EmptyTree EmptyTree)
+                (TreeNode "Wama" EmptyTree EmptyTree)
+    print bst
