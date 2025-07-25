@@ -1,11 +1,8 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 
-import Data.List (sort)
-
--- Common Types
+-- HC10T1: ShowSimple
 data PaymentMethod = Cash | Card | Cryptocurrency deriving (Eq, Ord, Show)
 
--- HC10T1: ShowSimple
 class ShowSimple a where
   showSimple :: a -> String
 
@@ -37,7 +34,7 @@ instance Comparable Blockchain where
   compareWith Bitcoin _         = GT
 
 -- HC10T4: Box Eq instance
-data Box a = Empty | Has a deriving Show
+data Box a = Empty | Has a deriving (Show)
 
 instance Eq a => Eq (Box a) where
   Empty == Empty = True
@@ -53,7 +50,7 @@ class ShowDetailed a where
 instance ShowDetailed User where
   showDetailed (User name mail) = "User " ++ name ++ " <" ++ mail ++ ">"
 
--- HC10T6: Mutual recursion for Eq
+-- HC10T6: Eq Blockchain (mutual recursion)
 instance Eq Blockchain where
   a == b = not (a /= b)
   a /= b = case (a, b) of
@@ -92,113 +89,49 @@ class Concatenatable a where
 instance Concatenatable [Char] where
   concatWith = (++)
 
--- HC11T1: WeAccept for Box
-class WeAccept a where
-  accept :: a -> Bool
-
-instance WeAccept (Box a) where
-  accept (Has _) = True
-  accept Empty   = False
-
--- HC11T2: WeAccept for other types
-instance WeAccept PaymentMethod where
-  accept Cash = True
-  accept Card = True
-  accept _    = False
-
-instance WeAccept Blockchain where
-  accept Cardano = True
-  accept _       = False
-
-fancyFunction :: WeAccept a => [a] -> [a]
-fancyFunction = filter accept
-
--- HC11T3: Container type class
-class Container c a where
-  isEmpty  :: c a -> Bool
-  contains :: Eq a => a -> c a -> Bool
-  replace  :: a -> c a -> c a
-
-instance Container Box a where
-  isEmpty Empty = True
-  isEmpty _     = False
-  contains x (Has y) = x == y
-  contains _ _       = False
-  replace x _        = Has x
-
--- HC11T4: Present container
-data Present a = Wrap a | Unwrap deriving Show
-
-instance Container Present a where
-  isEmpty Unwrap = True
-  isEmpty _      = False
-  contains x (Wrap y) = x == y
-  contains _ _        = False
-  replace x _         = Wrap x
-
--- HC11T5: guessWhat'sInside
-guessWhat'sInside :: (Container c a, Eq a) => a -> c a -> String
-guessWhat'sInside x c = if contains x c then "Found it!" else "Not inside"
-
--- HC11T7: Ord for Box
-instance Ord a => Ord (Box a) where
-  compare Empty Empty = EQ
-  compare Empty _     = LT
-  compare _ Empty     = GT
-  compare (Has x) (Has y) = compare x y
-
--- HC11T9: Length with Ord
-data Length = M Float | Km Float deriving (Eq, Show)
-
-instance Ord Length where
-  compare (M x) (M y)   = compare x y
-  compare (Km x) (Km y) = compare x y
-  compare (M x) (Km y)  = compare x (y * 1000)
-  compare (Km x) (M y)  = compare (x * 1000) y
-
--- HC11T10: sortContainers
-sortContainers :: Ord a => [a] -> [a]
-sortContainers = sort
-
+-- Main function to run all tests
 main :: IO ()
 main = do
-  putStrLn "=== HC10 and HC11 ==="
+  putStrLn "=== Chapter 10 Tasks ==="
 
   -- HC10T1: ShowSimple
+  putStrLn "\nHC10T1: ShowSimple"
   print $ showSimple Card
 
-  -- HC10T2: Summable (explicit type annotation)
-  print (sumUp [1,2,3] :: Int)
+  -- HC10T2: Summable
+  putStrLn "\nHC10T2: Summable"
+  print (sumUp [10, 20, 30] :: Int)  -- Rofha's total amount
 
   -- HC10T3: Comparable
-  print $ compareWith Ethereum Cardano
+  putStrLn "\nHC10T3: Comparable"
+  print $ compareWith Ethereum Cardano    -- Rokhe compares preferences
 
   -- HC10T4: Box Eq
-  print $ Has 5 == Has 5
+  putStrLn "\nHC10T4: Box Eq"
+  print $ Has "Wama" == Has "Wama"
 
   -- HC10T5: ShowDetailed
-  print $ showDetailed (User "Jane" "jane@demo.com")
+  putStrLn "\nHC10T5: ShowDetailed"
+  let userRofha = User "Rofha" "rofha@block.io"
+  print $ showDetailed userRofha
 
-  -- HC10T7: Convertible (explicit type annotation)
+  -- HC10T6: Eq Blockchain
+  putStrLn "\nHC10T6: Eq Blockchain"
+  print $ Ethereum == Ethereum
+  print $ Bitcoin == Ethereum
+
+  -- HC10T7: Convertible
+  putStrLn "\nHC10T7: Convertible"
   print (convert Cash :: String)
 
   -- HC10T8: AdvancedEq
-  print $ compareEquality Ethereum Ethereum
+  putStrLn "\nHC10T8: AdvancedEq"
+  print $ compareEquality Bitcoin Bitcoin
 
   -- HC10T9: MinMax
+  putStrLn "\nHC10T9: MinMax"
   print (minValue :: Int, maxValue :: Int)
 
   -- HC10T10: Concatenatable
-  print $ concatWith "Hello, " "World!"
-
-  -- HC11T2: fancyFunction for PaymentMethod
-  print $ fancyFunction [Cash, Cryptocurrency]
-
-  -- HC11T5: guessWhat'sInside
-  print $ guessWhat'sInside 5 (Has 5 :: Box Int)
-
-  -- HC11T10: sortContainers for Box
-  print $ sortContainers [Has 3, Empty, Has 1]
-
-  -- HC11T9: Length type comparison
-  print $ M 1000 == Km 1
+  putStrLn "\nHC10T10: Concatenatable"
+  print $ concatWith "Wama & " "Rokhe"
